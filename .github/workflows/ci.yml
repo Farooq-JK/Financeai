@@ -1,0 +1,29 @@
+name: FinanceAI CI Placeholder
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+      - name: Run Django checks
+        run: |
+          cd backend
+          python manage.py check
+
+  flutter-placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Flutter job placeholder
+        run: echo "Add Flutter SDK setup and flutter analyze when CI is ready."
