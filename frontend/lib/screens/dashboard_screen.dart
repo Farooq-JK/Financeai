@@ -1,68 +1,126 @@
 import 'package:flutter/material.dart';
-import '../models/dummy_data.dart';
-import '../utils/app_constants.dart';
+
+import '../utils/app_colors.dart';
 import '../widgets/app_card.dart';
-import 'add_expense_screen.dart';
-import 'ai_assistant_screen.dart';
-import 'analytics_screen.dart';
-import 'bills_screen.dart';
-import 'expenses_history_screen.dart';
-import 'notifications_screen.dart';
-import 'profile_settings_screen.dart';
-import 'receipt_scanner_screen.dart';
-import 'subscriptions_screen.dart';
+import '../widgets/app_scaffold.dart';
+import '../widgets/bottom_nav.dart';
+import 'ai_chat_screen.dart';
+import 'goal_setup_screen.dart';
+import 'meal_plan_screen.dart';
+import 'posture_check_screen.dart';
+import 'progress_tracker_screen.dart';
+import 'workout_plan_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final total = dummyExpenses.fold<double>(0, (sum, item) => sum + (item['amount'] as double));
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Dashboard'), backgroundColor: Colors.white, foregroundColor: AppColors.textDark, elevation: 0),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Total tracked this month', style: TextStyle(color: AppColors.textMuted)),
-              const SizedBox(height: 8),
-              Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.purple)),
-            ])),
-            const SizedBox(height: 12),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
+    return AppScaffold(
+      showBack: false,
+      bottomNavigationBar: const FitBottomNav(currentIndex: 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Hello, Farooq', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900)),
+                  SizedBox(height: 4),
+                  Text('Ready for a healthy day?', style: TextStyle(color: AppColors.textMuted)),
+                ],
+              ),
+              IconButton.filled(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GoalSetupScreen())),
+                icon: const Icon(Icons.tune),
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _tile(context, 'Add Expense', Icons.add_card, const AddExpenseScreen()),
-                _tile(context, 'Receipt Scanner', Icons.document_scanner, const ReceiptScannerScreen()),
-                _tile(context, 'History', Icons.history, const ExpensesHistoryScreen()),
-                _tile(context, 'Subscriptions', Icons.repeat, const SubscriptionsScreen()),
-                _tile(context, 'Analytics', Icons.pie_chart, const AnalyticsScreen()),
-                _tile(context, 'Bills', Icons.event_note, const BillsScreen()),
-                _tile(context, 'AI Assistant', Icons.smart_toy, const AiAssistantScreen()),
-                _tile(context, 'Notifications', Icons.notifications, const NotificationsScreen()),
-                _tile(context, 'Profile', Icons.person, const ProfileSettingsScreen()),
+                const Text('Today’s Summary', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 16),
+                Row(
+                  children: const [
+                    Expanded(child: _SummaryItem(label: 'Calories left', value: '520', icon: Icons.local_fire_department)),
+                    Expanded(child: _SummaryItem(label: 'Workout minutes', value: '35', icon: Icons.timer)),
+                    Expanded(child: _SummaryItem(label: 'Goal progress', value: '62%', icon: Icons.flag)),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 18),
+          GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.05,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _FeatureCard(title: 'Workout Plan', icon: Icons.fitness_center, onTap: () => _go(context, const WorkoutPlanScreen())),
+              _FeatureCard(title: 'Meal Plan', icon: Icons.restaurant_menu, onTap: () => _go(context, const MealPlanScreen())),
+              _FeatureCard(title: 'Progress', icon: Icons.show_chart, onTap: () => _go(context, const ProgressTrackerScreen())),
+              _FeatureCard(title: 'AI Coach', icon: Icons.smart_toy_outlined, onTap: () => _go(context, const AiChatScreen())),
+              _FeatureCard(title: 'Posture Check', icon: Icons.accessibility_new, onTap: () => _go(context, const PostureCheckScreen())),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Widget _tile(BuildContext context, String title, IconData icon, Widget screen) {
+  static void _go(BuildContext context, Widget page) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  }
+}
+
+class _SummaryItem extends StatelessWidget {
+  const _SummaryItem({required this.label, required this.value, required this.icon});
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        CircleAvatar(backgroundColor: AppColors.primaryLight, child: Icon(icon, color: AppColors.primary)),
+        const SizedBox(height: 8),
+        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+        Text(label, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+      ],
+    );
+  }
+}
+
+class _FeatureCard extends StatelessWidget {
+  const _FeatureCard({required this.title, required this.icon, required this.onTap});
+
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
     return AppCard(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(icon, color: AppColors.purple, size: 34),
-        const SizedBox(height: 10),
-        Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700)),
-      ]),
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircleAvatar(radius: 28, backgroundColor: AppColors.primaryLight, child: Icon(icon, color: AppColors.primary, size: 30)),
+          const SizedBox(height: 14),
+          Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800)),
+        ],
+      ),
     );
   }
 }
